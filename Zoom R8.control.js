@@ -1,7 +1,10 @@
+// Copy this File to:
+// Windows: %USERPROFILE%\Documents\Bitwig Studio\Controller Scripts\
+// Mac and Linux: ~/Bitwig Studio/Controller Scripts/
 
 loadAPI(1);
 
-host.defineController("Zoom", "Zoom R8", "1.0", "e5559d80-bf02-11e3-b1b6-0800200c9a66");
+host.defineController("Zoom", "Zoom R8", "1.1", "e5559d80-bf02-11e3-b1b6-0800200c9a66");
 host.defineMidiPorts(1, 1);
 host.addDeviceNameBasedDiscoveryPair(["ZOOM R8"], ["ZOOM R8"]);
 
@@ -17,21 +20,73 @@ var data2;                         // Used to go back the Banks
 var trackControlsBank = 1;         // Used for Track Controlls Bank Switching - Use R8's F2 BUtton to cycle the Banks
 var maxTrackControlBanks = 3;      // Max. Banks - Change this if you need more Banks
                                    // Each Bank has 9 Faders (8 Fader + Master Fader) and 8 Buttons
-// Copy this File to
-// Windows: %USERPROFILE%\Documents\Bitwig Studio\Controller Scripts\
-// Mac and Linux: ~/Bitwig Studio/Controller Scripts/
+
+/*
+ * Constants
+ */
+
+// Buttons
+
+function button1()                        { if(status == 144 && data1 == 8)  return true; return false; }
+function button2()                        { if(status == 144 && data1 == 9)  return true; return false; }
+function button3()                        { if(status == 144 && data1 == 10) return true; return false; }
+function button4()                        { if(status == 144 && data1 == 11) return true; return false; }
+function button5()                        { if(status == 144 && data1 == 12) return true; return false; }
+function button6()                        { if(status == 144 && data1 == 13) return true; return false; }
+function button7()                        { if(status == 144 && data1 == 14) return true; return false; }
+function button8()                        { if(status == 144 && data1 == 15) return true; return false; }
+
+function buttonF1()                       { if(status == 144 && data1 == 54) return true; return false; }
+function buttonF2()                       { if(status == 144 && data1 == 55) return true; return false; }
+
+function buttonPlay()                     { if(status == 144 && data1 == 94) return true; return false; }
+function buttonStop()                     { if(status == 144 && data1 == 93) return true; return false; }
+function buttonFastForward()              { if(status == 144 && data1 == 92) return true; return false; }
+function buttonRewind()                   { if(status == 144 && data1 == 91) return true; return false; }
+
+function buttonMarkerAddClear()           { if(status == 144 && data1 == 58) return true; return false; }
+function buttonMarkerNext()               { if(status == 144 && data1 == 57) return true; return false; }
+function buttonMarkerPrevious()           { if(status == 144 && data1 == 56) return true; return false; }
+
+function buttonLeft()                     { if(status == 144 && data1 == 98) return true; return false; }
+function buttonRight()                    { if(status == 144 && data1 == 99) return true; return false; }
+function buttonDown()                     { if(status == 144 && data1 == 97) return true; return false; }
+function buttonUp()                       { if(status == 144 && data1 == 96) return true; return false; }
+
+function jogWheelRotateClockwise()        { if(status == 176 && data1 == 60 && data2 == 1)  return true; return false; }
+function jogWheelRotateCounterclockwise() { if(status == 176 && data1 == 60 && data2 == 65) return true; return false; }
+
+// Fader
+
+function fader1()      { if(status == 224) return true; return false; }
+function fader2()      { if(status == 225) return true; return false; }
+function fader3()      { if(status == 226) return true; return false; }
+function fader4()      { if(status == 227) return true; return false; }
+function fader5()      { if(status == 228) return true; return false; }
+function fader6()      { if(status == 229) return true; return false; }
+function fader7()      { if(status == 230) return true; return false; }
+function fader8()      { if(status == 231) return true; return false; }
+function masterFader() { if(status == 232) return true; return false; }
+
+// Conditions
+
+function isFader()    { if(status >= 224 && status <= 232) return true; return false; }
+function isButton()   { if(status == 144) return true; return false; }
+function isPressed()  { if(data2  == 127) return true; return false; }
+function isReleased() { if(data2  == 0)   return true; return false; }
 
 function init()
 {
    application = host.createApplication();
-   transport = host.createTransport();
-   arranger = host.createArranger(0);
+   transport   = host.createTransport();
+   arranger    = host.createArranger(0);
 
    host.getMidiOutPort(0).setShouldSendMidiBeatClock;
    host.getMidiInPort(0).setMidiCallback(onMidi);
    host.getMidiInPort(0).setSysexCallback(onSysex);
 
    // Make CCs 0-512 freely mappable for all 16 Channels
+
    userControls = host.createUserControlsSection((HIGHEST_CC - LOWEST_CC + 1)*16); 
 
    host.showPopupNotification('Zoom R8 initialized');
@@ -40,24 +95,27 @@ function init()
 function onMidi(status, data1, data2)
 {
    this.status = status;
-   this.data1 = data1;
-   this.data2 = data2;
+   this.data1  = data1;
+   this.data2  = data2;
 
    println("");
    println("CC " + status + " CH " + MIDIChannel(status) + " D1 " + data1 + " D2 " + data2);
     
    // Register Midi Controllers
+
    if (data2 >= LOWEST_CC && data2 <= HIGHEST_CC)
    {
       // Check if it is a Fader
-      if(status >= 224 && status <= 232)
+
+      if(isFader())
       {
          index = status - LOWEST_CC + (HIGHEST_CC * MIDIChannel(status) + trackControlsBank);
          userControls.getControl(index).set(data2, 128);
       }
 
       // Check if it is a Button
-      if(status == 144)
+
+      if(isButton())
       {
          index = data1 - LOWEST_CC + (HIGHEST_CC * MIDIChannel(status) + trackControlsBank);
          userControls.getControl(index).set(data2, 128);
@@ -65,24 +123,24 @@ function onMidi(status, data1, data2)
 
       // Controller Assignment Labels for the Studio I/O Tab in Bitwig
 
-      if(status == 224) userControls.getControl(index).setLabel("Fader 1 (B" + trackControlsBank + ")"); // Fader 1
-      if(status == 225) userControls.getControl(index).setLabel("Fader 2 (B" + trackControlsBank + ")"); // Fader 2
-      if(status == 226) userControls.getControl(index).setLabel("Fader 3 (B" + trackControlsBank + ")"); // Fader 3
-      if(status == 227) userControls.getControl(index).setLabel("Fader 4 (B" + trackControlsBank + ")"); // Fader 4
-      if(status == 228) userControls.getControl(index).setLabel("Fader 5 (B" + trackControlsBank + ")"); // Fader 5
-      if(status == 229) userControls.getControl(index).setLabel("Fader 6 (B" + trackControlsBank + ")"); // Fader 6
-      if(status == 230) userControls.getControl(index).setLabel("Fader 7 (B" + trackControlsBank + ")"); // Fader 7
-      if(status == 231) userControls.getControl(index).setLabel("Fader 8 (B" + trackControlsBank + ")"); // Fader 8
-      if(status == 232) userControls.getControl(index).setLabel("Master-Fader (B" + trackControlsBank + ")"); // Master Fader
+      if(fader1())           userControls.getControl(index).setLabel("Fader 1 (B" + trackControlsBank + ")"); // Fader 1
+      if(fader2())           userControls.getControl(index).setLabel("Fader 2 (B" + trackControlsBank + ")"); // Fader 2
+      if(fader3())           userControls.getControl(index).setLabel("Fader 3 (B" + trackControlsBank + ")"); // Fader 3
+      if(fader4())           userControls.getControl(index).setLabel("Fader 4 (B" + trackControlsBank + ")"); // Fader 4
+      if(fader5())           userControls.getControl(index).setLabel("Fader 5 (B" + trackControlsBank + ")"); // Fader 5
+      if(fader6())           userControls.getControl(index).setLabel("Fader 6 (B" + trackControlsBank + ")"); // Fader 6
+      if(fader7())           userControls.getControl(index).setLabel("Fader 7 (B" + trackControlsBank + ")"); // Fader 7
+      if(fader8())           userControls.getControl(index).setLabel("Fader 8 (B" + trackControlsBank + ")"); // Fader 8
+      if(masterFader()) userControls.getControl(index).setLabel("Master-Fader (B" + trackControlsBank + ")"); // Master Fader
 
-      if(status == 144 && data1 == 8)  userControls.getControl(index).setLabel("Button 1 (B" + trackControlsBank + ")"); // Button 1
-      if(status == 144 && data1 == 9)  userControls.getControl(index).setLabel("Button 2 (B" + trackControlsBank + ")"); // Button 2
-      if(status == 144 && data1 == 10) userControls.getControl(index).setLabel("Button 3 (B" + trackControlsBank + ")"); // Button 3
-      if(status == 144 && data1 == 11) userControls.getControl(index).setLabel("Button 4 (B" + trackControlsBank + ")"); // Button 4
-      if(status == 144 && data1 == 12) userControls.getControl(index).setLabel("Button 5 (B" + trackControlsBank + ")"); // Button 5
-      if(status == 144 && data1 == 13) userControls.getControl(index).setLabel("Button 6 (B" + trackControlsBank + ")"); // Button 6
-      if(status == 144 && data1 == 14) userControls.getControl(index).setLabel("Button 7 (B" + trackControlsBank + ")"); // Button 7
-      if(status == 144 && data1 == 15) userControls.getControl(index).setLabel("Button 8 (B" + trackControlsBank + ")"); // Button 8
+      if(button1()) userControls.getControl(index).setLabel("Button 1 (B" + trackControlsBank + ")"); // Button 1
+      if(button2()) userControls.getControl(index).setLabel("Button 2 (B" + trackControlsBank + ")"); // Button 2
+      if(button3()) userControls.getControl(index).setLabel("Button 3 (B" + trackControlsBank + ")"); // Button 3
+      if(button4()) userControls.getControl(index).setLabel("Button 4 (B" + trackControlsBank + ")"); // Button 4
+      if(button5()) userControls.getControl(index).setLabel("Button 5 (B" + trackControlsBank + ")"); // Button 5
+      if(button6()) userControls.getControl(index).setLabel("Button 6 (B" + trackControlsBank + ")"); // Button 6
+      if(button7()) userControls.getControl(index).setLabel("Button 7 (B" + trackControlsBank + ")"); // Button 7
+      if(button8()) userControls.getControl(index).setLabel("Button 8 (B" + trackControlsBank + ")"); // Button 8
 
    }
 
@@ -91,15 +149,17 @@ function onMidi(status, data1, data2)
     */
 
    // Play
-   if(status == 144 && data1 == 94 && data2 == 127) 
+
+   if(buttonPlay() && isPressed()) 
    {
       transport.togglePlay();
-      //host.showPopupNotification("Play");
-      println("Toggle Play");
+      //host.showPopupNotification("Toggle Play");
+      println("Toggle Play"); 
    }
 
    // Stop
-   if(status == 144 && data1 == 93 && data2 == 127) 
+
+   if(buttonStop() && isPressed()) 
    {
       transport.stop();
       //host.showPopupNotification("Stop");
@@ -107,7 +167,8 @@ function onMidi(status, data1, data2)
    }
 
    // Enable Zoom Function
-   if(status == 144 && data1 == 54 && data2 == 127) 
+
+   if(buttonF1() && isPressed()) 
    {
       zoomFunction = true;
       host.showPopupNotification("Zoom");
@@ -115,7 +176,8 @@ function onMidi(status, data1, data2)
    }
 
    // Disable Zoom Function
-   if(status == 144 && data1 == 54 && data2 == 0) 
+
+   if(buttonF1() && isReleased()) 
    {
       zoomFunction = false;
       //host.showPopupNotification("Zoom off");
@@ -123,11 +185,13 @@ function onMidi(status, data1, data2)
    }
 
    // Check if Zoom is inactive
+
    if(!zoomFunction) 
    {
 
       // Scrub Forward
-      if(status == 176 && data1 == 60 && data2 == 1) 
+
+      if(jogWheelRotateClockwise()) 
       {
          transport.incPosition(1.0, true);
          //host.showPopupNotification("..>");
@@ -135,7 +199,7 @@ function onMidi(status, data1, data2)
       }
 
       // Scrub Backward
-      if(status == 176 && data1 == 60 && data2 == 65) 
+      if(jogWheelRotateCounterclockwise()) 
       {
          transport.incPosition(-1.0, true);
          //host.showPopupNotification("<..");
@@ -145,11 +209,13 @@ function onMidi(status, data1, data2)
    }
 
    // Check if Zoom is active
+
    if(zoomFunction) 
    {
 
       // Zoom in
-      if(status == 176 && data1 == 60 && data2 == 1) 
+
+      if(jogWheelRotateClockwise()) 
       {
          application.zoomIn();
          //host.showPopupNotification("Zoom +");
@@ -157,7 +223,8 @@ function onMidi(status, data1, data2)
       }
 
       // Zoom out
-      if(status == 176 && data1 == 60 && data2 == 65) 
+
+      if(jogWheelRotateCounterclockwise()) 
       {
          application.zoomOut();
          //host.showPopupNotification("Zoom -");
@@ -166,10 +233,11 @@ function onMidi(status, data1, data2)
 
    }
 
-   // Switch Track Control Banks
+   // Navigate Track Control Banks forwards
+
    if(!zoomFunction) 
    {
-      if(status == 144 && data1 == 55 && data2 == 127) 
+      if(buttonF2() && isPressed()) 
       {
 
          println("Switch Track Control Banks");
@@ -198,15 +266,16 @@ function onMidi(status, data1, data2)
 
       }
 
-      if(status == 144 && data1 == 55 && data2 == 0) bankFunction = false;
+      if(buttonF2() && isReleased()) bankFunction = false;
    }
 
    // Navigate Track Control Banks backwards
+
    if(bankFunction)
    {
       println("Switch Track Control Banks");
 
-      if(buttonF1Pressed()) 
+      if(buttonF1() && isPressed()) 
       {
          for(i=maxTrackControlBanks; i>1; i--)
          {
@@ -231,9 +300,10 @@ function onMidi(status, data1, data2)
    }
 
    // Zoom to Fit
+
    if(zoomFunction)  
    {
-      if(status == 144 && data1 == 55 && data2 == 127) 
+      if(buttonF2() && isPressed()) 
       {
          application.zoomToFit();
          host.showPopupNotification("Zoom to Fit");
@@ -242,7 +312,8 @@ function onMidi(status, data1, data2)
    }
 
    // FastForward
-   if(status == 144 && data1 == 92 && data2 == 127) 
+
+   if(buttonFastForward() && isPressed()) 
    {
       transport.fastForward();
       //host.showPopupNotification(">>");
@@ -250,48 +321,62 @@ function onMidi(status, data1, data2)
    }
 
    // Rewind
-   if(status == 144 && data1 == 91 && data2 == 127) 
+
+   if(buttonRewind() && isPressed()) 
    {
       transport.rewind();
       //host.showPopupNotification("<<");
       println("Rewind");
    }
 
-   // Toggle Marker Visibility
-   if(status == 144 && data1 == 58 && data2 == 127)
+   // Add / Clear Marker
+
+   if(buttonMarkerAddClear() && isPressed())
    {
       //TODO: Add / Clear Marker
    }  
 
    // Next Marker
-   if(status == 144 && data1 == 57 && data2 == 127)
+
+   if(buttonMarkerNext() && isPressed())
    {
-      //arranger.nextMarker(); //TODO: whats the API Method for this ?
+      //arranger.nextMarker(); //TODO: Whats the API Method for this ?
+   }  
+
+   // Previous Marker
+
+   if(buttonMarkerPrevious() && isPressed())
+   {
+      //arranger.previousMarker(); //TODO: Whats the API Method for this ?
    }   
 
    // Cursor Left
-   if(status == 144 && data1 == 98 && data2 == 127)
+
+   if(buttonLeft() && isPressed())
    {
       application.arrowKeyLeft();
       println("Left");
    } 
 
    // Cursor Right
-   if(status == 144 && data1 == 99 && data2 == 127)
+
+   if(buttonRight() && isPressed())
    {
       application.arrowKeyRight();
       println("Right");
    } 
 
    // Cursor Down
-   if(status == 144 && data1 == 97 && data2 == 127)
+
+   if(buttonDown() && isPressed())
    {
       application.arrowKeyDown();
       println("Down");
    } 
 
    // Cursor Up
-   if(status == 144 && data1 == 96 && data2 == 127)
+
+   if(buttonUp() && isPressed())
    {
       application.arrowKeyUp();
       println("Up");
@@ -303,17 +388,5 @@ function onSysex(data)
 {
    printSysex(data);
 }
-
-/*
- * Tools
- */
-
-function buttonF1Pressed()
-{
-   if(status == 144 && data1 == 54 && data2 == 127) return true;
-   return false; 
-}
-
-
 
 function exit() {}
