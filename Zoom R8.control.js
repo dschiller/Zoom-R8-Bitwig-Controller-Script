@@ -280,8 +280,6 @@ function onMidi(status, data1, data2)
       if(buttonF2() && isPressed()) 
       {
 
-         println("Switch Track Control Banks");
-
          bankFunction = true;
 
          for(i=1; i<maxBanks; i++)
@@ -290,7 +288,7 @@ function onMidi(status, data1, data2)
             {
                bank = i+1;
                host.showPopupNotification("Bank " + bank);
-               println("Bank " + bank + " / " + maxBanks);
+               println("Switch Bank " + bank + " / " + maxBanks);
                return;
             }
 
@@ -300,7 +298,7 @@ function onMidi(status, data1, data2)
          {
             bank = 1;
             host.showPopupNotification("Bank " + bank);
-            println("Bank " + bank + " / " + maxBanks);
+            println("Switch Bank " + bank + " / " + maxBanks);
             return;
          }
 
@@ -313,7 +311,6 @@ function onMidi(status, data1, data2)
 
    if(bankFunction)
    {
-      println("Switch Track Control Banks");
 
       if(buttonF1() && isPressed()) 
       {
@@ -323,7 +320,7 @@ function onMidi(status, data1, data2)
             {
                bank = i-1;
                host.showPopupNotification("Bank " + bank);
-               println("Bank " + bank + " / " + maxBanks);
+               println("Switch Bank " + bank + " / " + maxBanks);
                return;
             }
 
@@ -333,7 +330,7 @@ function onMidi(status, data1, data2)
          {
             bank = maxBanks;
             host.showPopupNotification("Bank " + bank);
-            println("Bank " + bank + " / " + maxBanks);
+            println("Switch Bank " + bank + " / " + maxBanks);
             return;
          }
       }
