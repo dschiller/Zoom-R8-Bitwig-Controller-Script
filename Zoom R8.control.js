@@ -114,7 +114,7 @@ function onMidi(status, data1, data2)
       println("Zoom off");
    }
 
-   // Check if not Zoom is inactive
+   // Check if Zoom is inactive
    if(!zoomFunction) 
    {
 
@@ -136,7 +136,7 @@ function onMidi(status, data1, data2)
 
    }
 
-   // Check if not Zoom is active
+   // Check if Zoom is active
    if(zoomFunction) 
    {
 
