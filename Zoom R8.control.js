@@ -213,6 +213,8 @@ function onMidi(status, data1, data2)
    if(zoomFunction) 
    {
 
+      // TODO: Maybe a Bug: Arrangement must be focused
+
       // Zoom in
 
       if(jogWheelRotateClockwise()) 
@@ -333,21 +335,21 @@ function onMidi(status, data1, data2)
 
    if(buttonMarkerAddClear() && isPressed())
    {
-      //TODO: Add / Clear Marker
+      // TODO: Add / Clear Marker
    }  
 
    // Next Marker
 
    if(buttonMarkerNext() && isPressed())
    {
-      //arranger.nextMarker(); //TODO: Whats the API Method for this ?
+      //arranger.nextMarker(); // TODO: What's the API Method for this ?
    }  
 
    // Previous Marker
 
    if(buttonMarkerPrevious() && isPressed())
    {
-      //arranger.previousMarker(); //TODO: Whats the API Method for this ?
+      //arranger.previousMarker(); // TODO: What's the API Method for this ?
    }   
 
    // Cursor Left
