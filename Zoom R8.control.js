@@ -35,7 +35,7 @@ var status;                        // Used to go back the Banks
 var data1;                         // Used to go back the Banks
 var data2;                         // Used to go back the Banks
 var bank = 1;                      // Used for Bank Switching - Use R8's F2 Button to cycle the Banks forward
-                                   // Use R8's F2 + F1 Button to cycle the Banks backward
+                                   // Use R8's F2 + F1 Buttons to cycle the Banks backward
 var maxBanks = 3;                  // Max. Banks - Change this if you need more Banks
                                    // Each Bank has 9 Faders (8 Faders + Master-Fader) and 8 Buttons
 
