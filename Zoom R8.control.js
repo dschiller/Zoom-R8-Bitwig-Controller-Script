@@ -143,7 +143,7 @@ function onMidi(status, data1, data2)
 
    if (data2 >= LOWEST_CC && data2 <= HIGHEST_CC)
    {
-      // Check if it is a Fader
+      // If it is a Fader register the Fader
 
       if(isFader())
       {
@@ -151,7 +151,7 @@ function onMidi(status, data1, data2)
          userControls.getControl(index).set(data2, 128);
       }
 
-      // Check if it is a Button
+      // If it is a Button regsiter the Button
 
       if(isButton())
       {
@@ -159,7 +159,7 @@ function onMidi(status, data1, data2)
          userControls.getControl(index).set(data2, 128);
       }
 
-      // Controller Assignment Labels for the Studio I/O Tab in Bitwig
+      // Set Controller Assignment Labels for the "Studio I/O" Tab in Bitwig
 
       if(fader1())           userControls.getControl(index).setLabel("Fader 1 (B" + bank + ")"); // Fader 1
       if(fader2())           userControls.getControl(index).setLabel("Fader 2 (B" + bank + ")"); // Fader 2
@@ -222,7 +222,7 @@ function onMidi(status, data1, data2)
       println("Zoom off");
    }
 
-   // Check if Zoom is inactive
+   // If Zoom is inactive execute Scrub Function with Jog Wheel
 
    if(!zoomFunction) 
    {
@@ -246,7 +246,7 @@ function onMidi(status, data1, data2)
 
    }
 
-   // Check if Zoom is active
+   // If Zoom is active execute Zoom Function with Jog Wheel
 
    if(zoomFunction) 
    {
@@ -273,7 +273,7 @@ function onMidi(status, data1, data2)
 
    }
 
-   // Navigate Track Control Banks forwards
+   // Navigate Banks forward
 
    if(!zoomFunction) 
    {
@@ -309,7 +309,7 @@ function onMidi(status, data1, data2)
       if(buttonF2() && isReleased()) bankFunction = false;
    }
 
-   // Navigate Track Control Banks backwards
+   // Navigate Banks backward
 
    if(bankFunction)
    {
