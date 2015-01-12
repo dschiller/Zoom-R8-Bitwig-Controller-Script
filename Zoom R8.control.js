@@ -37,7 +37,7 @@ function onMidi(status, data1, data2)
 {
     println("");
     println("CC " + status + " CH " + MIDIChannel(status) + " D1 " + data1 + " D2 " + data2);
-	 
+    
    // Register Midi Controllers
    if (data2 >= LOWEST_CC && data2 <= HIGHEST_CC)
    {
@@ -159,31 +159,45 @@ function onMidi(status, data1, data2)
    }
 
    // Switch Track Control Banks
-   if(status == 144 && data1 == 55 && data2 == 127) 
+   if(!zoomFunction) 
    {
-
-      println("Switch Track Control Banks");
-
-      for(i=1; i<maxTrackControlBanks; i++)
+      if(status == 144 && data1 == 55 && data2 == 127) 
       {
-         if(trackControlsBank == i) 
+
+         println("Switch Track Control Banks");
+
+         for(i=1; i<maxTrackControlBanks; i++)
          {
-            trackControlsBank = i+1;
+            if(trackControlsBank == i) 
+            {
+               trackControlsBank = i+1;
+               host.showPopupNotification("Bank " + trackControlsBank);
+               println("Bank " + trackControlsBank + " / " + maxTrackControlBanks);
+               return;
+            }
+
+         }
+
+         if(trackControlsBank == maxTrackControlBanks) 
+         {
+            trackControlsBank = 1;
             host.showPopupNotification("Bank " + trackControlsBank);
             println("Bank " + trackControlsBank + " / " + maxTrackControlBanks);
             return;
          }
 
       }
+   } 
 
-      if(trackControlsBank == maxTrackControlBanks) 
+   // Zoom to Fit
+   if(zoomFunction)  
+   {
+      if(status == 144 && data1 == 55 && data2 == 127) 
       {
-         trackControlsBank = 1;
-         host.showPopupNotification("Bank " + trackControlsBank);
-         println("Bank " + trackControlsBank + " / " + maxTrackControlBanks);
-         return;
+         application.zoomToFit();
+         host.showPopupNotification("Zoom to Fit");
+         println("Zoom to Fit");
       }
-
    }
 
    // FastForward
@@ -246,7 +260,7 @@ function onMidi(status, data1, data2)
 
 function onSysex(data)
 {
-	printSysex(data);
+   printSysex(data);
 }
 
 function exit() {}
