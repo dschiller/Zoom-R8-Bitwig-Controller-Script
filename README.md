@@ -9,4 +9,5 @@ Features:
 - Use Faders and Buttons in 3 Banks (Press F2 Button to cycle Banks) (Also expandable in the Script to more Banks)
 - Use Scroll Wheel on R8 for navigate in Arrangement
 - Use Scroll Wheel on R8 to zoom in and out (Press and hold F1 Key on R8 to Zoom)
+- Use F1 + F2 to Zoom to Fit 
 - Use Regular Transport Buttons for Play, Stop, Back to Beginning, Fast Forward, Rewind, Cursors (Left, Right, Up, Down)
