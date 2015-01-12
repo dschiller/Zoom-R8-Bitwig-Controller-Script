@@ -151,7 +151,7 @@ function onMidi(status, data1, data2)
          userControls.getControl(index).set(data2, 128);
       }
 
-      // If it is a Button regsiter the Button
+      // If it is a Button register the Button
 
       if(isButton())
       {
