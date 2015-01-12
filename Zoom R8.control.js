@@ -93,6 +93,8 @@ function isButton()   { if(status == 144) return true; return false; }
 function isPressed()  { if(data2  == 127) return true; return false; }
 function isReleased() { if(data2  == 0)   return true; return false; }
 
+// Init Function will be executed if the Controller is added to Bitwig
+
 function init()
 {
    application = host.createApplication();
@@ -100,7 +102,13 @@ function init()
    arranger    = host.createArranger(0);
 
    host.getMidiOutPort(0).setShouldSendMidiBeatClock;
+
+   // Acticate Callback Function to be able to listen to MIDI Signals comming from R8
+
    host.getMidiInPort(0).setMidiCallback(onMidi);
+
+   // Acticate Callback Function to be able to listen to MIDI Signals (Sysex) comming from R8
+
    host.getMidiInPort(0).setSysexCallback(onSysex);
 
    // Make CCs 0-512 freely mappable for all 16 Channels
@@ -110,11 +118,23 @@ function init()
    host.showPopupNotification('Zoom R8 initialized');
 }
 
+// onMidi Function will be executed each Time a MIDI Signal will be send from R8 to Bitwig
+
 function onMidi(status, data1, data2)
 {
    this.status = status;
    this.data1  = data1;
    this.data2  = data2;
+
+   /* 
+    * Debugging
+    *
+    * Print MIDI Signals comming from R8 to Bitwig on Bitwig's Controller Script Console 
+    * (In Bitwig > Menu "View" > "Show Control Script Console" > Select "Zoom R8.controls.js")
+    *
+    * Use Command "restart" in the Console to Reload the Script if you changed something
+    *
+    */
 
    println("");
    println("CC " + status + " CH " + MIDIChannel(status) + " D1 " + data1 + " D2 " + data2);
