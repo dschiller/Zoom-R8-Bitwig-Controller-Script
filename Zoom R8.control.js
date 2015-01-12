@@ -13,6 +13,9 @@ var zoomFunction = false;          // Used for toggling the Zoom Function - Use 
 var trackControlsBank = 1;         // Used for Track Controlls Bank Switching - Use R8's F2 BUtton to cycle the Banks
 var maxTrackControlBanks = 3;      // Max. Banks - Change this if you need more Banks
                                    // Each Bank has 9 Faders (8 Fader + Master Fader) and 8 Buttons
+// Copy this File to
+// Windows: %USERPROFILE%\Documents\Bitwig Studio\Controller Scripts\
+// Mac and Linux: ~/Bitwig Studio/Controller Scripts/
 
 function init()
 {
