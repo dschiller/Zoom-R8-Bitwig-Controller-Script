@@ -4,22 +4,39 @@
 
 loadAPI(1);
 
-host.defineController("Zoom", "Zoom R8", "1.1", "e5559d80-bf02-11e3-b1b6-0800200c9a66");
+host.defineController("Zoom", "Zoom R8", "1.1", "a2559d80-af12-11e3-b2b6-0800200c9a66");
 host.defineMidiPorts(1, 1);
 host.addDeviceNameBasedDiscoveryPair(["ZOOM R8"], ["ZOOM R8"]);
+
+/*
+ * Declarations
+ */
+
+// Registering Midi Controllers
 
 var index;                         // Used to register the Midi CC
 var LOWEST_CC = 0;                 // Lowest possible CC Controller
 var HIGHEST_CC = 512;              // Highest possible CC Controller
+
+// Bitwig's System Sections
+
 var application;                   // Used for Bitwig's GUI Commands which are assigned to R8
+var transport;                     // Used for Bitwig's GUI Commands which are assigned to R8
+var arranger;                      // Used for Bitwig's GUI Commands which are assigned to R8
+
+// Modes
+
 var zoomFunction = false;          // Used for toggling the Zoom Function - Use R8's F1 Button for Zoom
 var bankFunction = false;          // Used to go back the Banks
+
+// Bank Function
+
 var status;                        // Used to go back the Banks
 var data1;                         // Used to go back the Banks
 var data2;                         // Used to go back the Banks
-var trackControlsBank = 1;         // Used for Track Controlls Bank Switching - Use R8's F2 BUtton to cycle the Banks
-var maxTrackControlBanks = 3;      // Max. Banks - Change this if you need more Banks
-                                   // Each Bank has 9 Faders (8 Fader + Master Fader) and 8 Buttons
+var bank = 1;                      // Used for Bank Switching - Use R8's F2 Button to cycle the Banks forward / Use R8's F2 + F1 Button to cycle the Banks backward
+var maxBanks = 3;                  // Max. Banks - Change this if you need more Banks
+                                   // Each Bank has 9 Faders (8 Faders + Master-Fader) and 8 Buttons
 
 /*
  * Constants
@@ -56,7 +73,7 @@ function buttonUp()                       { if(status == 144 && data1 == 96) ret
 function jogWheelRotateClockwise()        { if(status == 176 && data1 == 60 && data2 == 1)  return true; return false; }
 function jogWheelRotateCounterclockwise() { if(status == 176 && data1 == 60 && data2 == 65) return true; return false; }
 
-// Fader
+// Faders
 
 function fader1()      { if(status == 224) return true; return false; }
 function fader2()      { if(status == 225) return true; return false; }
@@ -109,7 +126,7 @@ function onMidi(status, data1, data2)
 
       if(isFader())
       {
-         index = status - LOWEST_CC + (HIGHEST_CC * MIDIChannel(status) + trackControlsBank);
+         index = status - LOWEST_CC + (HIGHEST_CC * MIDIChannel(status) + bank);
          userControls.getControl(index).set(data2, 128);
       }
 
@@ -117,30 +134,30 @@ function onMidi(status, data1, data2)
 
       if(isButton())
       {
-         index = data1 - LOWEST_CC + (HIGHEST_CC * MIDIChannel(status) + trackControlsBank);
+         index = data1 - LOWEST_CC + (HIGHEST_CC * MIDIChannel(status) + bank);
          userControls.getControl(index).set(data2, 128);
       }
 
       // Controller Assignment Labels for the Studio I/O Tab in Bitwig
 
-      if(fader1())           userControls.getControl(index).setLabel("Fader 1 (B" + trackControlsBank + ")"); // Fader 1
-      if(fader2())           userControls.getControl(index).setLabel("Fader 2 (B" + trackControlsBank + ")"); // Fader 2
-      if(fader3())           userControls.getControl(index).setLabel("Fader 3 (B" + trackControlsBank + ")"); // Fader 3
-      if(fader4())           userControls.getControl(index).setLabel("Fader 4 (B" + trackControlsBank + ")"); // Fader 4
-      if(fader5())           userControls.getControl(index).setLabel("Fader 5 (B" + trackControlsBank + ")"); // Fader 5
-      if(fader6())           userControls.getControl(index).setLabel("Fader 6 (B" + trackControlsBank + ")"); // Fader 6
-      if(fader7())           userControls.getControl(index).setLabel("Fader 7 (B" + trackControlsBank + ")"); // Fader 7
-      if(fader8())           userControls.getControl(index).setLabel("Fader 8 (B" + trackControlsBank + ")"); // Fader 8
-      if(masterFader()) userControls.getControl(index).setLabel("Master-Fader (B" + trackControlsBank + ")"); // Master Fader
+      if(fader1())           userControls.getControl(index).setLabel("Fader 1 (B" + bank + ")"); // Fader 1
+      if(fader2())           userControls.getControl(index).setLabel("Fader 2 (B" + bank + ")"); // Fader 2
+      if(fader3())           userControls.getControl(index).setLabel("Fader 3 (B" + bank + ")"); // Fader 3
+      if(fader4())           userControls.getControl(index).setLabel("Fader 4 (B" + bank + ")"); // Fader 4
+      if(fader5())           userControls.getControl(index).setLabel("Fader 5 (B" + bank + ")"); // Fader 5
+      if(fader6())           userControls.getControl(index).setLabel("Fader 6 (B" + bank + ")"); // Fader 6
+      if(fader7())           userControls.getControl(index).setLabel("Fader 7 (B" + bank + ")"); // Fader 7
+      if(fader8())           userControls.getControl(index).setLabel("Fader 8 (B" + bank + ")"); // Fader 8
+      if(masterFader()) userControls.getControl(index).setLabel("Master-Fader (B" + bank + ")"); // Master Fader
 
-      if(button1()) userControls.getControl(index).setLabel("Button 1 (B" + trackControlsBank + ")"); // Button 1
-      if(button2()) userControls.getControl(index).setLabel("Button 2 (B" + trackControlsBank + ")"); // Button 2
-      if(button3()) userControls.getControl(index).setLabel("Button 3 (B" + trackControlsBank + ")"); // Button 3
-      if(button4()) userControls.getControl(index).setLabel("Button 4 (B" + trackControlsBank + ")"); // Button 4
-      if(button5()) userControls.getControl(index).setLabel("Button 5 (B" + trackControlsBank + ")"); // Button 5
-      if(button6()) userControls.getControl(index).setLabel("Button 6 (B" + trackControlsBank + ")"); // Button 6
-      if(button7()) userControls.getControl(index).setLabel("Button 7 (B" + trackControlsBank + ")"); // Button 7
-      if(button8()) userControls.getControl(index).setLabel("Button 8 (B" + trackControlsBank + ")"); // Button 8
+      if(button1()) userControls.getControl(index).setLabel("Button 1 (B" + bank + ")"); // Button 1
+      if(button2()) userControls.getControl(index).setLabel("Button 2 (B" + bank + ")"); // Button 2
+      if(button3()) userControls.getControl(index).setLabel("Button 3 (B" + bank + ")"); // Button 3
+      if(button4()) userControls.getControl(index).setLabel("Button 4 (B" + bank + ")"); // Button 4
+      if(button5()) userControls.getControl(index).setLabel("Button 5 (B" + bank + ")"); // Button 5
+      if(button6()) userControls.getControl(index).setLabel("Button 6 (B" + bank + ")"); // Button 6
+      if(button7()) userControls.getControl(index).setLabel("Button 7 (B" + bank + ")"); // Button 7
+      if(button8()) userControls.getControl(index).setLabel("Button 8 (B" + bank + ")"); // Button 8
 
    }
 
@@ -246,23 +263,23 @@ function onMidi(status, data1, data2)
 
          bankFunction = true;
 
-         for(i=1; i<maxTrackControlBanks; i++)
+         for(i=1; i<maxBanks; i++)
          {
-            if(trackControlsBank == i) 
+            if(bank == i) 
             {
-               trackControlsBank = i+1;
-               host.showPopupNotification("Bank " + trackControlsBank);
-               println("Bank " + trackControlsBank + " / " + maxTrackControlBanks);
+               bank = i+1;
+               host.showPopupNotification("Bank " + bank);
+               println("Bank " + bank + " / " + maxBanks);
                return;
             }
 
          }
 
-         if(trackControlsBank == maxTrackControlBanks) 
+         if(bank == maxBanks) 
          {
-            trackControlsBank = 1;
-            host.showPopupNotification("Bank " + trackControlsBank);
-            println("Bank " + trackControlsBank + " / " + maxTrackControlBanks);
+            bank = 1;
+            host.showPopupNotification("Bank " + bank);
+            println("Bank " + bank + " / " + maxBanks);
             return;
          }
 
@@ -279,23 +296,23 @@ function onMidi(status, data1, data2)
 
       if(buttonF1() && isPressed()) 
       {
-         for(i=maxTrackControlBanks; i>1; i--)
+         for(i=maxBanks; i>1; i--)
          {
-            if(trackControlsBank == i) 
+            if(bank == i) 
             {
-               trackControlsBank = i-1;
-               host.showPopupNotification("Bank " + trackControlsBank);
-               println("Bank " + trackControlsBank + " / " + maxTrackControlBanks);
+               bank = i-1;
+               host.showPopupNotification("Bank " + bank);
+               println("Bank " + bank + " / " + maxBanks);
                return;
             }
 
          }
 
-         if(trackControlsBank == 1) 
+         if(bank == 1) 
          {
-            trackControlsBank = maxTrackControlBanks;
-            host.showPopupNotification("Bank " + trackControlsBank);
-            println("Bank " + trackControlsBank + " / " + maxTrackControlBanks);
+            bank = maxBanks;
+            host.showPopupNotification("Bank " + bank);
+            println("Bank " + bank + " / " + maxBanks);
             return;
          }
       }
