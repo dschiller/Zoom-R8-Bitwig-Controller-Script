@@ -5,7 +5,7 @@ host.defineController("Zoom", "Zoom R8", "1.0", "e5559d80-bf02-11e3-b1b6-0800200
 host.defineMidiPorts(1, 1);
 host.addDeviceNameBasedDiscoveryPair(["ZOOM R8"], ["ZOOM R8"]);
 
-var index;                         // Used for register the Midi CC
+var index;                         // Used to register the Midi CC
 var LOWEST_CC = 0;                 // Lowest possible CC Controller
 var HIGHEST_CC = 512;              // Highest possible CC Controller
 var application;                   // Used for Bitwig's GUI Commands which are assigned to R8
