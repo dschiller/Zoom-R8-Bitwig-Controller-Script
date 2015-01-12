@@ -10,6 +10,10 @@ var LOWEST_CC = 0;                 // Lowest possible CC Controller
 var HIGHEST_CC = 512;              // Highest possible CC Controller
 var application;                   // Used for Bitwig's GUI Commands which are assigned to R8
 var zoomFunction = false;          // Used for toggling the Zoom Function - Use R8's F1 Button for Zoom
+var bankFunction = false;          // Used to go back the Banks
+var status;                        // Used to go back the Banks
+var data1;                         // Used to go back the Banks
+var data2;                         // Used to go back the Banks
 var trackControlsBank = 1;         // Used for Track Controlls Bank Switching - Use R8's F2 BUtton to cycle the Banks
 var maxTrackControlBanks = 3;      // Max. Banks - Change this if you need more Banks
                                    // Each Bank has 9 Faders (8 Fader + Master Fader) and 8 Buttons
@@ -35,8 +39,12 @@ function init()
 
 function onMidi(status, data1, data2)
 {
-    println("");
-    println("CC " + status + " CH " + MIDIChannel(status) + " D1 " + data1 + " D2 " + data2);
+   this.status = status;
+   this.data1 = data1;
+   this.data2 = data2;
+
+   println("");
+   println("CC " + status + " CH " + MIDIChannel(status) + " D1 " + data1 + " D2 " + data2);
     
    // Register Midi Controllers
    if (data2 >= LOWEST_CC && data2 <= HIGHEST_CC)
@@ -166,6 +174,8 @@ function onMidi(status, data1, data2)
 
          println("Switch Track Control Banks");
 
+         bankFunction = true;
+
          for(i=1; i<maxTrackControlBanks; i++)
          {
             if(trackControlsBank == i) 
@@ -187,7 +197,38 @@ function onMidi(status, data1, data2)
          }
 
       }
-   } 
+
+      if(status == 144 && data1 == 55 && data2 == 0) bankFunction = false;
+   }
+
+   // Navigate Track Control Banks backwards
+   if(bankFunction)
+   {
+      println("Switch Track Control Banks");
+
+      if(buttonF1Pressed()) 
+      {
+         for(i=maxTrackControlBanks; i>1; i--)
+         {
+            if(trackControlsBank == i) 
+            {
+               trackControlsBank = i-1;
+               host.showPopupNotification("Bank " + trackControlsBank);
+               println("Bank " + trackControlsBank + " / " + maxTrackControlBanks);
+               return;
+            }
+
+         }
+
+         if(trackControlsBank == 1) 
+         {
+            trackControlsBank = maxTrackControlBanks;
+            host.showPopupNotification("Bank " + trackControlsBank);
+            println("Bank " + trackControlsBank + " / " + maxTrackControlBanks);
+            return;
+         }
+      }
+   }
 
    // Zoom to Fit
    if(zoomFunction)  
@@ -262,5 +303,17 @@ function onSysex(data)
 {
    printSysex(data);
 }
+
+/*
+ * Tools
+ */
+
+function buttonF1Pressed()
+{
+   if(status == 144 && data1 == 54 && data2 == 127) return true;
+   return false; 
+}
+
+
 
 function exit() {}
