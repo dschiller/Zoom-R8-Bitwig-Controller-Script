@@ -1,5 +1,4 @@
 # Zoom-R8-Bitwig-Controller-Script
-Zoom R8 Bitwig Controller Script
 
 This Script enables you to use the Zoom R8 in Bitwig.
 
