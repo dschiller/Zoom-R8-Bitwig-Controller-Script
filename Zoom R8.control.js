@@ -4,7 +4,7 @@
 
 loadAPI(1);
 
-host.defineController("Zoom", "Zoom R8", "1.1", "a2559d80-af12-11e3-b2b6-0800200c9a66");
+host.defineController("Zoom", "Zoom R8", "1.2", "a2559d80-af12-11e3-b2b6-0800200c9a66");
 host.defineMidiPorts(1, 1);
 host.addDeviceNameBasedDiscoveryPair(["ZOOM R8"], ["ZOOM R8"]);
 
@@ -484,7 +484,7 @@ function onMidi(status, data1, data2)
       {
          button = 1;
          scene = (8 * sceneBank - 7) + button - 1;
-         clipLauncherScenesOrSlots.launch(scene - 1 + button - 1);
+         clipLauncherScenesOrSlots.launch(scene - 1);
          host.showPopupNotification("Launch Scene " + scene);
          println("Launch Scene " + scene);
       }
@@ -493,7 +493,7 @@ function onMidi(status, data1, data2)
       {
          button = 2;
          scene = (8 * sceneBank - 7) + button - 1;
-         clipLauncherScenesOrSlots.launch(scene - 1 + button - 1);
+         clipLauncherScenesOrSlots.launch(scene - 1);
          host.showPopupNotification("Launch Scene " + scene);
          println("Launch Scene " + scene);
       }
@@ -502,7 +502,7 @@ function onMidi(status, data1, data2)
       {
          button = 3;
          scene = (8 * sceneBank - 7) + button - 1;
-         clipLauncherScenesOrSlots.launch(scene - 1 + button - 1);
+         clipLauncherScenesOrSlots.launch(scene - 1);
          host.showPopupNotification("Launch Scene " + scene);
          println("Launch Scene " + scene);
       }
@@ -511,7 +511,7 @@ function onMidi(status, data1, data2)
       {
          button = 4;
          scene = (8 * sceneBank - 7) + button - 1;
-         clipLauncherScenesOrSlots.launch(scene - 1 + button - 1);
+         clipLauncherScenesOrSlots.launch(scene - 1);
          host.showPopupNotification("Launch Scene " + scene);
          println("Launch Scene " + scene);
       }
@@ -520,7 +520,7 @@ function onMidi(status, data1, data2)
       {
          button = 5;
          scene = (8 * sceneBank - 7) + button - 1;
-         clipLauncherScenesOrSlots.launch(scene - 1 + button - 1);
+         clipLauncherScenesOrSlots.launch(scene - 1);
          host.showPopupNotification("Launch Scene " + scene);
          println("Launch Scene " + scene);
       }
@@ -529,7 +529,7 @@ function onMidi(status, data1, data2)
       {
          button = 6;
          scene = (8 * sceneBank - 7) + button - 1;
-         clipLauncherScenesOrSlots.launch(scene - 1 + button - 1);
+         clipLauncherScenesOrSlots.launch(scene - 1);
          host.showPopupNotification("Launch Scene " + scene);
          println("Launch Scene " + scene);
       }
@@ -538,7 +538,7 @@ function onMidi(status, data1, data2)
       {
          button = 7;
          scene = (8 * sceneBank - 7) + button - 1;
-         clipLauncherScenesOrSlots.launch(scene - 1 + button - 1);
+         clipLauncherScenesOrSlots.launch(scene - 1);
          host.showPopupNotification("Launch Scene " + scene);
          println("Launch Scene " + scene);
       }
@@ -547,7 +547,7 @@ function onMidi(status, data1, data2)
       {
          button = 8;
          scene = (8 * sceneBank - 7) + button - 1;
-         clipLauncherScenesOrSlots.launch(scene - 1 + button - 1);
+         clipLauncherScenesOrSlots.launch(scene - 1);
          host.showPopupNotification("Launch Scene " + scene);
          println("Launch Scene " + scene);
       }
