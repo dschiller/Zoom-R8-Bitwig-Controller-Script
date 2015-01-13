@@ -4,7 +4,7 @@
 
 loadAPI(1);
 
-host.defineController("Zoom", "Zoom R8", "1.2", "a2559d80-af12-11e3-b2b6-0800200c9a66");
+host.defineController("Zoom", "Zoom R8", "1.3", "a2559d80-af12-11e3-b2b6-0800200c9a66");
 host.defineMidiPorts(1, 1);
 host.addDeviceNameBasedDiscoveryPair(["ZOOM R8"], ["ZOOM R8"]);
 
@@ -15,7 +15,7 @@ host.addDeviceNameBasedDiscoveryPair(["ZOOM R8"], ["ZOOM R8"]);
 // Registering Midi Controllers
 
 var index;                         // Used to register the Midi CC
-var LOWEST_CC = 0;                 // Lowest possible CC Controller
+var LOWEST_CC  = 0;                // Lowest possible CC Controller
 var HIGHEST_CC = 512;              // Highest possible CC Controller
 
 // Bitwig's System Sections
@@ -24,15 +24,19 @@ var application;                   // Used for Bitwig's GUI Commands which are a
 var transport;                     // Used for Bitwig's GUI Commands which are assigned to R8
 var arranger;                      // Used for Bitwig's GUI Commands which are assigned to R8
 var trackBank                      // Used for the Scene Commands
-var clipLauncherScenesOrSlots      // Used for Bitwig's Scene Commands 
+var clipLauncherScenesOrSlots;     // Used for Bitwig's Scene Commands 
+var track;                         // Used for Mixer Mode to control the Tracks and it's Properties
 
 // Modes
 
-var zoomFunction = false;          // Used for toggling the Zoom Function - Use R8's F1 Button for Zoom
-var shiftFunction = false;         // Used for Button Combinations to activate different Functions
-var bankFunction = false;          // Used to go back the Banks
-var sceneFunction = false;         // Used for the Scene Functions
+var zoomFunction      = false;     // Used for toggling the Zoom Function - Use R8's F1 Button for Zoom
+var shiftFunction     = false;     // Used for Button Combinations to activate different Functions
+var bankFunction      = false;     // Used to go back the Banks
+var sceneFunction     = false;     // Used for the Scene Functions
 var sceneBankFunction = false;     // Used for the Scene Bank Switch Functions
+var midiMode          = true;      // Used for switching between different Modes with the R8 "<Bank" Button under the Display
+var mixerMode         = false;     // Used for switching between different Modes with the R8 "<Bank" Button under the Display
+var panMode           = false;     // Used for switching between Pan and Volume in Mixer Mode
 
 // Bank Function
 
@@ -58,15 +62,16 @@ var maxSceneBanks = 4;             // Max. Scene Banks - Change this if you need
  */
 
 // Buttons
-
-function button1()                        { if(status == 144 && data1 == 8)  return true; return false; }
-function button2()                        { if(status == 144 && data1 == 9)  return true; return false; }
-function button3()                        { if(status == 144 && data1 == 10) return true; return false; }
-function button4()                        { if(status == 144 && data1 == 11) return true; return false; }
-function button5()                        { if(status == 144 && data1 == 12) return true; return false; }
-function button6()                        { if(status == 144 && data1 == 13) return true; return false; }
-function button7()                        { if(status == 144 && data1 == 14) return true; return false; }
-function button8()                        { if(status == 144 && data1 == 15) return true; return false; }
+                                          // Button Modes on R8:       REC           SOLO           MUTE
+function button1()                        { if(status == 144 && (data1 == 0 || data1 == 8  || data1 == 16)) return true; return false; }
+function button2()                        { if(status == 144 && (data1 == 1 || data1 == 9  || data1 == 17)) return true; return false; }
+function button3()                        { if(status == 144 && (data1 == 2 || data1 == 10 || data1 == 18)) return true; return false; }
+function button4()                        { if(status == 144 && (data1 == 3 || data1 == 11 || data1 == 19)) return true; return false; }
+function button5()                        { if(status == 144 && (data1 == 4 || data1 == 12 || data1 == 20)) return true; return false; }
+function button6()                        { if(status == 144 && (data1 == 5 || data1 == 13 || data1 == 21)) return true; return false; }
+function button7()                        { if(status == 144 && (data1 == 6 || data1 == 14 || data1 == 22)) return true; return false; }
+function button8()                        { if(status == 144 && (data1 == 7 || data1 == 15 || data1 == 23)) return true; return false; }
+                                          // Button Modes on R8 - End
 
 function buttonF1()                       { if(status == 144 && data1 == 54) return true; return false; }
 function buttonF2()                       { if(status == 144 && data1 == 55) return true; return false; }
@@ -87,6 +92,9 @@ function buttonLeft()                     { if(status == 144 && data1 == 98) ret
 function buttonRight()                    { if(status == 144 && data1 == 99) return true; return false; }
 function buttonDown()                     { if(status == 144 && data1 == 97) return true; return false; }
 function buttonUp()                       { if(status == 144 && data1 == 96) return true; return false; }
+
+function buttonDisplayA()                 { if(status == 144 && data1 == 46) return true; return false; }
+function buttonDisplayB()                 { if(status == 144 && data1 == 47) return true; return false; }
 
 function jogWheelRotateClockwise()        { if(status == 176 && data1 == 60 && data2 == 1)  return true; return false; }
 function jogWheelRotateCounterclockwise() { if(status == 176 && data1 == 60 && data2 == 65) return true; return false; }
@@ -114,11 +122,15 @@ function isReleased() { if(data2  == 0)   return true; return false; }
 
 function init()
 {
-   application = host.createApplication();
-   transport   = host.createTransport();
-   arranger    = host.createArranger(0);
-   trackBank   = host.createMainTrackBank(512,512,512);
+
+   // Access Bitwig's Structure
+
+   application               = host.createApplication();
+   transport                 = host.createTransport();
+   arranger                  = host.createArranger(0);
+   trackBank                 = host.createMainTrackBank(128,128,128);
    clipLauncherScenesOrSlots = trackBank.getClipLauncherScenes();
+   track                     = host.createMasterTrack(128);
 
    host.getMidiOutPort(0).setShouldSendMidiBeatClock;
 
@@ -134,7 +146,10 @@ function init()
 
    userControls = host.createUserControlsSection((HIGHEST_CC - LOWEST_CC + 1)*16); 
 
+   // Say Hello ;)
+
    host.showPopupNotification('Zoom R8 initialized');
+
 }
 
 // onMidi Function will be executed each Time a MIDI Signal will be send from R8 to Bitwig
@@ -158,9 +173,9 @@ function onMidi(status, data1, data2)
    println("");
    println("CC " + status + " CH " + MIDIChannel(status) + " D1 " + data1 + " D2 " + data2);
     
-   // Register Midi Controllers
+   // If MIDI Mode is active register Midi Controllers
 
-   if (data2 >= LOWEST_CC && data2 <= HIGHEST_CC)
+   if (data2 >= LOWEST_CC && data2 <= HIGHEST_CC && midiMode)
    {
       // If it is a Fader register the Fader
 
@@ -295,9 +310,9 @@ function onMidi(status, data1, data2)
 
    }
 
-   // If Shift Button (F1) is not pressed navigate Banks forward
+   // If MIDI Mode is active and Shift Button (F1) is not pressed navigate Banks forward
 
-   if(!shiftFunction) 
+   if(!shiftFunction && midiMode) 
    {
       if(buttonF2() && isPressed()) 
       {
@@ -312,9 +327,9 @@ function onMidi(status, data1, data2)
       if(buttonF2() && isReleased()) bankFunction = false;
    }
 
-   // If Bank Button (F2) is pressed navigate Banks backward
+   // If MIDI Mode is active Bank Button (F2) is pressed navigate Banks backward
 
-   if(bankFunction)
+   if(bankFunction && midiMode)
    {
 
       if(buttonF1() && isPressed()) 
@@ -484,73 +499,135 @@ function onMidi(status, data1, data2)
       {
          button = 1;
          scene = (8 * sceneBank - 7) + button - 1;
-         clipLauncherScenesOrSlots.launch(scene - 1);
+         trackBank.launchScene(scene - 1);
          host.showPopupNotification("Launch Scene " + scene);
          println("Launch Scene " + scene);
+         trackBank.scrollToScene(scene -1);
       }
 
       if(button2() && isPressed())
       {
          button = 2;
          scene = (8 * sceneBank - 7) + button - 1;
-         clipLauncherScenesOrSlots.launch(scene - 1);
+         trackBank.launchScene(scene - 1);
          host.showPopupNotification("Launch Scene " + scene);
          println("Launch Scene " + scene);
+         trackBank.scrollToScene(scene -1);
       }
 
       if(button3() && isPressed())
       {
          button = 3;
          scene = (8 * sceneBank - 7) + button - 1;
-         clipLauncherScenesOrSlots.launch(scene - 1);
+         trackBank.launchScene(scene - 1);
          host.showPopupNotification("Launch Scene " + scene);
          println("Launch Scene " + scene);
+         trackBank.scrollToScene(scene -1);
       }
 
       if(button4() && isPressed())
       {
          button = 4;
          scene = (8 * sceneBank - 7) + button - 1;
-         clipLauncherScenesOrSlots.launch(scene - 1);
+         trackBank.launchScene(scene - 1);
          host.showPopupNotification("Launch Scene " + scene);
          println("Launch Scene " + scene);
+         trackBank.scrollToScene(scene -1);
       }
 
       if(button5() && isPressed())
       {
          button = 5;
          scene = (8 * sceneBank - 7) + button - 1;
-         clipLauncherScenesOrSlots.launch(scene - 1);
+         trackBank.launchScene(scene - 1);
          host.showPopupNotification("Launch Scene " + scene);
          println("Launch Scene " + scene);
+         trackBank.scrollToScene(scene -1);
       }
 
       if(button6() && isPressed())
       {
          button = 6;
          scene = (8 * sceneBank - 7) + button - 1;
-         clipLauncherScenesOrSlots.launch(scene - 1);
+         trackBank.launchScene(scene - 1);
          host.showPopupNotification("Launch Scene " + scene);
          println("Launch Scene " + scene);
+         trackBank.scrollToScene(scene -1);
       }
 
       if(button7() && isPressed())
       {
          button = 7;
          scene = (8 * sceneBank - 7) + button - 1;
-         clipLauncherScenesOrSlots.launch(scene - 1);
+         trackBank.launchScene(scene - 1);
          host.showPopupNotification("Launch Scene " + scene);
          println("Launch Scene " + scene);
+         trackBank.scrollToScene(scene -1);
       }
 
       if(button8() && isPressed())
       {
          button = 8;
          scene = (8 * sceneBank - 7) + button - 1;
-         clipLauncherScenesOrSlots.launch(scene - 1);
+         trackBank.launchScene(scene - 1);
          host.showPopupNotification("Launch Scene " + scene);
          println("Launch Scene " + scene);
+         trackBank.scrollToScene(scene -1);
       }
+   }
+
+   /*
+    * Launch Scenes - End
+    */
+
+   // Switch Modes (MIDI / Mixer)
+
+   if(buttonDisplayA() && isPressed())
+   {
+      if(midiMode) 
+      {
+         midiMode = false;
+         mixerMode = true;
+         host.showPopupNotification("Mixer Mode")
+         println("Mixer Mode");
+         return;
+      }
+
+      if(mixerMode)
+      {
+         midiMode = true;
+         mixerMode = false;
+         host.showPopupNotification("MIDI Mode")
+         println("MIDI Mode");
+         return;
+      }
+   }
+
+   // If Mixer Mode is active enable Pan Mode to change Panorama
+
+   if(mixerMode && buttonDisplayB() && isPressed())
+   {
+      panMode = true;
+      host.showPopupNotification("Pan");
+      println("Pan");
+   }
+
+   // If Mixer Mode is active enable Volume Mode to change Volume
+
+   if(mixerMode && buttonDisplayB() && isReleased())
+   {
+      panMode = false;
+      host.showPopupNotification("Volume");
+      println("Volume");
+   }
+
+   /*
+    * Track Control
+    */
+
+   if(mixerMode && fader1())
+   {
+      track.select();
    }
 
 }
