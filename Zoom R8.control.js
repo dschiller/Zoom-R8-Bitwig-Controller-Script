@@ -51,7 +51,7 @@ var maxBanks = 3;                  // Max. Banks - Change this if you need more 
 // Scene Function
 
 var scene;                         // Used for Scene Launching
-var button;                        // Used for Scene Launching
+var button;                        // Used for Scene Launching / Used for REC, SOLO, MUTE in Mixer Mode
 var sceneBank = 1;                 // Used for Scene Bank Switching - Use R8's F5 + F3 (backward) or
                                    // F5 + F4 (forward) to change the Scene Banks
 var maxSceneBanks = 4;             // Max. Scene Banks - Change this if you need more Banks
@@ -64,6 +64,9 @@ var trackNumber;                   // Used to get the Tracks Number
 var track;                         // Used to get the Tracks and it's Properties
 var volume;                        // Used for Volume Changes
 var pan;                           // Used for Panorama Changes
+var arm;                           // Used to toggle ARM / REC
+var solo;                          // Used to toggle SOLOR
+var mute;                          // Used to toggle MUTE
 var trackBank = 1;                 // Used for Track Bank switching
 var maxTrackBanks = 4;             // Max. Track Banks - Change this if you need more than 32 Tracks (4 * 8 Fader)
                                    // Master-Fader is singleton; will not be implemented in the Banks
@@ -134,6 +137,10 @@ function isFader()    { if(status >= 224 && status <= 232) return true; return f
 function isButton()   { if(status == 144) return true; return false; }
 function isPressed()  { if(data2  == 127) return true; return false; }
 function isReleased() { if(data2  == 0)   return true; return false; }
+
+function isButtonRecord() { if(data1 >= 0  && data1 <= 7)  return true; return false; };
+function isButtonSolo()   { if(data1 >= 8  && data1 <= 15) return true; return false; };
+function isButtonMute()   { if(data1 >= 16 && data1 <= 23) return true; return false; };
 
 // Init Function will be executed if the Controller is added to Bitwig
 
@@ -681,6 +688,8 @@ function onMidi(status, data1, data2)
     * Track Control
     */
 
+   // Tracks 1 - n (Depends on how much Banks you have declared ("maxTrackBanks"))
+
    if(mixerMode && fader1())
    {
 
@@ -956,6 +965,240 @@ function onMidi(status, data1, data2)
          println("Master-Track - Panorama " + data2);
       }
 
+   }
+
+   // Buttons for REC, SOLO, MUTE
+
+   if(mixerMode && button1() && isPressed())
+   {
+
+      button = 1;
+      trackNumber = (8 * trackBank - 7) + button - 1;
+      track = tracks.getTrack(trackNumber - 1);
+      if(!track.exists()) { host.showPopupNotification("Track " + trackNumber + " does not exist"); return; }
+      if(activateTouchedTrack) track.select();
+
+      if(isButtonRecord())
+      {
+         arm = track.getArm(); 
+         arm.toggle();
+      }
+      
+      if(isButtonSolo())
+      {
+         solo = track.getSolo(); 
+         solo.toggle();
+      }
+
+      
+      if(isButtonMute())
+      {
+         mute = track.getMute(); 
+         mute.toggle();
+      }
+   }
+
+   if(mixerMode && button2() && isPressed())
+   {
+
+      button = 2;
+      trackNumber = (8 * trackBank - 7) + button - 1;
+      track = tracks.getTrack(trackNumber - 1);
+      if(!track.exists()) { host.showPopupNotification("Track " + trackNumber + " does not exist"); return; }
+      if(activateTouchedTrack) track.select();
+
+      if(isButtonRecord())
+      {
+         arm = track.getArm(); 
+         arm.toggle();
+      }
+      
+      if(isButtonSolo())
+      {
+         solo = track.getSolo(); 
+         solo.toggle();
+      }
+
+      
+      if(isButtonMute())
+      {
+         mute = track.getMute(); 
+         mute.toggle();
+      }
+   }
+
+   if(mixerMode && button3() && isPressed())
+   {
+
+      button = 3;
+      trackNumber = (8 * trackBank - 7) + button - 1;
+      track = tracks.getTrack(trackNumber - 1);
+      if(!track.exists()) { host.showPopupNotification("Track " + trackNumber + " does not exist"); return; }
+      if(activateTouchedTrack) track.select();
+
+      if(isButtonRecord())
+      {
+         arm = track.getArm(); 
+         arm.toggle();
+      }
+      
+      if(isButtonSolo())
+      {
+         solo = track.getSolo(); 
+         solo.toggle();
+      }
+
+      
+      if(isButtonMute())
+      {
+         mute = track.getMute(); 
+         mute.toggle();
+      }
+   }
+
+   if(mixerMode && button4() && isPressed())
+   {
+
+      button = 4;
+      trackNumber = (8 * trackBank - 7) + button - 1;
+      track = tracks.getTrack(trackNumber - 1);
+      if(!track.exists()) { host.showPopupNotification("Track " + trackNumber + " does not exist"); return; }
+      if(activateTouchedTrack) track.select();
+
+      if(isButtonRecord())
+      {
+         arm = track.getArm(); 
+         arm.toggle();
+      }
+      
+      if(isButtonSolo())
+      {
+         solo = track.getSolo(); 
+         solo.toggle();
+      }
+
+      
+      if(isButtonMute())
+      {
+         mute = track.getMute(); 
+         mute.toggle();
+      }
+   }
+
+   if(mixerMode && button5() && isPressed())
+   {
+
+      button = 5;
+      trackNumber = (8 * trackBank - 7) + button - 1;
+      track = tracks.getTrack(trackNumber - 1);
+      if(!track.exists()) { host.showPopupNotification("Track " + trackNumber + " does not exist"); return; }
+      if(activateTouchedTrack) track.select();
+
+      if(isButtonRecord())
+      {
+         arm = track.getArm(); 
+         arm.toggle();
+      }
+      
+      if(isButtonSolo())
+      {
+         solo = track.getSolo(); 
+         solo.toggle();
+      }
+
+      
+      if(isButtonMute())
+      {
+         mute = track.getMute(); 
+         mute.toggle();
+      }
+   }
+
+   if(mixerMode && button6() && isPressed())
+   {
+
+      button = 6;
+      trackNumber = (8 * trackBank - 7) + button - 1;
+      track = tracks.getTrack(trackNumber - 1);
+      if(!track.exists()) { host.showPopupNotification("Track " + trackNumber + " does not exist"); return; }
+      if(activateTouchedTrack) track.select();
+
+      if(isButtonRecord())
+      {
+         arm = track.getArm(); 
+         arm.toggle();
+      }
+      
+      if(isButtonSolo())
+      {
+         solo = track.getSolo(); 
+         solo.toggle();
+      }
+
+      
+      if(isButtonMute())
+      {
+         mute = track.getMute(); 
+         mute.toggle();
+      }
+   }
+
+   if(mixerMode && button7() && isPressed())
+   {
+
+      button = 7;
+      trackNumber = (8 * trackBank - 7) + button - 1;
+      track = tracks.getTrack(trackNumber - 1);
+      if(!track.exists()) { host.showPopupNotification("Track " + trackNumber + " does not exist"); return; }
+      if(activateTouchedTrack) track.select();
+
+      if(isButtonRecord())
+      {
+         arm = track.getArm(); 
+         arm.toggle();
+      }
+      
+      if(isButtonSolo())
+      {
+         solo = track.getSolo(); 
+         solo.toggle();
+      }
+
+      
+      if(isButtonMute())
+      {
+         mute = track.getMute(); 
+         mute.toggle();
+      }
+   }
+
+   if(mixerMode && button8() && isPressed())
+   {
+
+      button = 8;
+      trackNumber = (8 * trackBank - 7) + button - 1;
+      track = tracks.getTrack(trackNumber - 1);
+      if(!track.exists()) { host.showPopupNotification("Track " + trackNumber + " does not exist"); return; }
+      if(activateTouchedTrack) track.select();
+
+      if(isButtonRecord())
+      {
+         arm = track.getArm(); 
+         arm.toggle();
+      }
+      
+      if(isButtonSolo())
+      {
+         solo = track.getSolo(); 
+         solo.toggle();
+      }
+
+      
+      if(isButtonMute())
+      {
+         mute = track.getMute(); 
+         mute.toggle();
+      }
    }
 
 }
