@@ -23,7 +23,8 @@ var HIGHEST_CC = 512;              // Highest possible CC Controller
 var application;                   // Used for Bitwig's GUI Commands which are assigned to R8
 var transport;                     // Used for Bitwig's GUI Commands which are assigned to R8
 var arranger;                      // Used for Bitwig's GUI Commands which are assigned to R8
-var tracks                         // Used for the Scene Commands and Mixer Mode to control the Tracks and it's Properties
+var tracks;                        // Used for the Scene Commands and Mixer Mode to control the Tracks and it's Properties
+var masterTrack;                   // Used for Mixer Mode to control the Master Track and it's Properties
 
 // Modes
 
@@ -66,6 +67,11 @@ var pan;                           // Used for Panorama Changes
 var trackBank = 1;                 // Used for Track Bank switching
 var maxTrackBanks = 4;             // Max. Track Banks - Change this if you need more than 32 Tracks (4 * 8 Fader)
                                    // Master-Fader is singleton; will not be implemented in the Banks
+
+// Script Switches
+
+var activateTouchedTrack = false;  // If TRUE the Track which will be changed (Volume / Pan) in Mixer Mode will be activated / selected
+                                   // If FALSE the Track will not be selected / activated
 
 /*
  * Constants
@@ -139,6 +145,7 @@ function init()
    transport                 = host.createTransport();
    arranger                  = host.createArranger(0);
    tracks                    = host.createMainTrackBank(512,512,512);
+   masterTrack               = host.createMasterTrack(512); 
 
    host.getMidiOutPort(0).setShouldSendMidiBeatClock;
 
@@ -671,7 +678,7 @@ function onMidi(status, data1, data2)
       trackNumber = (8 * trackBank - 7) + fader - 1;
       track = tracks.getTrack(trackNumber - 1);
       if(!track.exists()) { host.showPopupNotification("Track " + trackNumber + " does not exist"); return; }
-      track.select();
+      if(activateTouchedTrack) track.select();
 
       // Volume Mode
 
@@ -702,7 +709,7 @@ function onMidi(status, data1, data2)
       trackNumber = (8 * trackBank - 7) + fader - 1;
       track = tracks.getTrack(trackNumber - 1);
       if(!track.exists()) { host.showPopupNotification("Track " + trackNumber + " does not exist"); return; }
-      track.select();
+      if(activateTouchedTrack) track.select();
 
       // Volume Mode
 
@@ -733,7 +740,7 @@ function onMidi(status, data1, data2)
       trackNumber = (8 * trackBank - 7) + fader - 1;
       track = tracks.getTrack(trackNumber - 1);
       if(!track.exists()) { host.showPopupNotification("Track " + trackNumber + " does not exist"); return; }
-      track.select();
+      if(activateTouchedTrack) track.select();
 
       // Volume Mode
 
@@ -764,7 +771,7 @@ function onMidi(status, data1, data2)
       trackNumber = (8 * trackBank - 7) + fader - 1;
       track = tracks.getTrack(trackNumber - 1);
       if(!track.exists()) { host.showPopupNotification("Track " + trackNumber + " does not exist"); return; }
-      track.select();
+      if(activateTouchedTrack) track.select();
 
       // Volume Mode
 
@@ -795,7 +802,7 @@ function onMidi(status, data1, data2)
       trackNumber = (8 * trackBank - 7) + fader - 1;
       track = tracks.getTrack(trackNumber - 1);
       if(!track.exists()) { host.showPopupNotification("Track " + trackNumber + " does not exist"); return; }
-      track.select();
+      if(activateTouchedTrack) track.select();
 
       // Volume Mode
 
@@ -826,7 +833,7 @@ function onMidi(status, data1, data2)
       trackNumber = (8 * trackBank - 7) + fader - 1;
       track = tracks.getTrack(trackNumber - 1);
       if(!track.exists()) { host.showPopupNotification("Track " + trackNumber + " does not exist"); return; }
-      track.select();
+      if(activateTouchedTrack) track.select();
 
       // Volume Mode
 
@@ -857,7 +864,7 @@ function onMidi(status, data1, data2)
       trackNumber = (8 * trackBank - 7) + fader - 1;
       track = tracks.getTrack(trackNumber - 1);
       if(!track.exists()) { host.showPopupNotification("Track " + trackNumber + " does not exist"); return; }
-      track.select();
+      if(activateTouchedTrack) track.select();
 
       // Volume Mode
 
@@ -888,7 +895,7 @@ function onMidi(status, data1, data2)
       trackNumber = (8 * trackBank - 7) + fader - 1;
       track = tracks.getTrack(trackNumber - 1);
       if(!track.exists()) { host.showPopupNotification("Track " + trackNumber + " does not exist"); return; }
-      track.select();
+      if(activateTouchedTrack) track.select();
 
       // Volume Mode
 
@@ -908,6 +915,35 @@ function onMidi(status, data1, data2)
          pan.set(data2, 128);
          host.showPopupNotification("Track " + trackNumber + " - Panorama " + data2);
          println("Track " + trackNumber + " - Panorama " + data2);
+      }
+
+   }
+
+   // Master Track
+
+   if(mixerMode && masterFader())
+   {
+
+      if(activateTouchedTrack) masterTrack.select();
+
+      // Volume Mode
+
+      if(!panMode)
+      {
+         volume = masterTrack.getVolume();
+         volume.set(data2, 128);
+         host.showPopupNotification("Master-Track - Volume " + data2);
+         println("Master-Track - Volume " + data2);
+      }
+
+      // Pan Mode
+
+      if(panMode)
+      {
+         pan = masterTrack.getPan();
+         pan.set(data2, 128);
+         host.showPopupNotification("Master-Track - Panorama " + data2);
+         println("Master-Track - Panorama " + data2);
       }
 
    }
