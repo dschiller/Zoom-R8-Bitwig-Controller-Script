@@ -68,7 +68,7 @@ var arm;                           // Used to toggle ARM / REC
 var solo;                          // Used to toggle SOLOR
 var mute;                          // Used to toggle MUTE
 var trackBank = 1;                 // Used for Track Bank switching
-var maxTrackBanks = 4;             // Max. Track Banks - Change this if you need more than 32 Tracks (4 * 8 Fader)
+var maxTrackBanks = 4;             // Max. Track Banks - Change this if you need more than 32 Tracks (4 * 8 Fader + 4 * 8 Buttons (à REC, SOLO, MUTE))
                                    // Master-Fader is singleton; will not be implemented in the Banks
 
 // Script Switches
