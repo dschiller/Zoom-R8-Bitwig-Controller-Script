@@ -97,6 +97,7 @@ function buttonF5()                       { if(status == 144 && data1 == 58) ret
 
 function buttonPlay()                     { if(status == 144 && data1 == 94) return true; return false; }
 function buttonStop()                     { if(status == 144 && data1 == 93) return true; return false; }
+function buttonRecord()                   { if(status == 144 && data1 == 95) return true; return false; }
 function buttonFastForward()              { if(status == 144 && data1 == 92) return true; return false; }
 function buttonRewind()                   { if(status == 144 && data1 == 91) return true; return false; }
 
@@ -249,6 +250,15 @@ function onMidi(status, data1, data2)
    if(buttonStop() && isPressed()) 
    {
       transport.stop();
+      //host.showPopupNotification("Stop");
+      println("Stop");
+   }
+
+   // Record
+
+   if(buttonRecord() && isPressed()) 
+   {
+      transport.record();
       //host.showPopupNotification("Stop");
       println("Stop");
    }
