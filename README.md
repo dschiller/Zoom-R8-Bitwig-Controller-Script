@@ -11,4 +11,4 @@ Features:
 - Use Jog Wheel to Zoom in and out (Press and hold F1 Button and rotate Jog Wheel / Arrangement must be focused)
 - Use F1 + F2 to Zoom to Fit 
 - Use Regular Transport Buttons for Play, Stop, Back to Beginning, Fast Forward, Rewind, Cursors (Left, Right, Up, Down)
-- Scene Launcher (4 Banks - expandable in Script; Use F1 + F5 hold them to activate Scene Selector then press Button 1 - 8 to launch Scenes; To switch Scene Banks use F5 + F4 (forward) and F5 + F3 (backward)) 
+- Scene Launcher (4 Banks - expandable in Script; Use F1 + F5 hold them to activate Scene Selector then press Button 1 - 8 (Buttons on the R8 must be in Solo Mode (Solo, Mute, Rec are possible)) to launch Scenes; To switch Scene Banks use F5 + F4 (forward) and F5 + F3 (backward)) 
