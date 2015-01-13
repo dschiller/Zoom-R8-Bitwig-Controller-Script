@@ -23,11 +23,16 @@ var HIGHEST_CC = 512;              // Highest possible CC Controller
 var application;                   // Used for Bitwig's GUI Commands which are assigned to R8
 var transport;                     // Used for Bitwig's GUI Commands which are assigned to R8
 var arranger;                      // Used for Bitwig's GUI Commands which are assigned to R8
+var trackBank                      // Used for the Scene Commands
+var clipLauncherScenesOrSlots      // Used for Bitwig's Scene Commands 
 
 // Modes
 
 var zoomFunction = false;          // Used for toggling the Zoom Function - Use R8's F1 Button for Zoom
+var shiftFunction = false;         // Used for Button Combinations to activate different Functions
 var bankFunction = false;          // Used to go back the Banks
+var sceneFunction = false;         // Used for the Scene Functions
+var sceneBankFunction = false;     // Used for the Scene Bank Switch Functions
 
 // Bank Function
 
@@ -38,6 +43,15 @@ var bank = 1;                      // Used for Bank Switching - Use R8's F2 Butt
                                    // Use R8's F2 + F1 Buttons to cycle the Banks backward
 var maxBanks = 3;                  // Max. Banks - Change this if you need more Banks
                                    // Each Bank has 9 Faders (8 Faders + Master-Fader) and 8 Buttons
+
+// Scene Function
+
+var scene;                         // Used for Scene Launching
+var button;                        // Used for Scene Launching
+var sceneBank = 1;                 // Used for Scene Bank Switching - Use R8's F5 + F3 (backward) or
+                                   // F5 + F4 (forward) to change the Scene Banks
+var maxSceneBanks = 4;             // Max. Scene Banks - Change this if you need more Banks
+                                   // Each Scene Bank has 8 playable Scenes
 
 /*
  * Constants
@@ -56,6 +70,9 @@ function button8()                        { if(status == 144 && data1 == 15) ret
 
 function buttonF1()                       { if(status == 144 && data1 == 54) return true; return false; }
 function buttonF2()                       { if(status == 144 && data1 == 55) return true; return false; }
+function buttonF3()                       { if(status == 144 && data1 == 56) return true; return false; }
+function buttonF4()                       { if(status == 144 && data1 == 57) return true; return false; }
+function buttonF5()                       { if(status == 144 && data1 == 58) return true; return false; }
 
 function buttonPlay()                     { if(status == 144 && data1 == 94) return true; return false; }
 function buttonStop()                     { if(status == 144 && data1 == 93) return true; return false; }
@@ -100,6 +117,8 @@ function init()
    application = host.createApplication();
    transport   = host.createTransport();
    arranger    = host.createArranger(0);
+   trackBank   = host.createMainTrackBank(512,512,512);
+   clipLauncherScenesOrSlots = trackBank.getClipLauncherScenes();
 
    host.getMidiOutPort(0).setShouldSendMidiBeatClock;
 
@@ -151,9 +170,9 @@ function onMidi(status, data1, data2)
          userControls.getControl(index).set(data2, 128);
       }
 
-      // If it is a Button register the Button
+      // If Scene Function is disabled and if it is a Button register the Button
 
-      if(isButton())
+      if(isButton() && !sceneFunction)
       {
          index = data1 - LOWEST_CC + (HIGHEST_CC * MIDIChannel(status) + bank);
          userControls.getControl(index).set(data2, 128);
@@ -209,8 +228,9 @@ function onMidi(status, data1, data2)
    if(buttonF1() && isPressed()) 
    {
       zoomFunction = true;
+      shiftFunction = true;
       host.showPopupNotification("Zoom");
-      println("Zoom on");
+      println("Zoom on / Shift pressed");
    }
 
    // Disable Zoom Function
@@ -218,11 +238,12 @@ function onMidi(status, data1, data2)
    if(buttonF1() && isReleased()) 
    {
       zoomFunction = false;
+      shiftFunction = false;
       //host.showPopupNotification("Zoom off");
-      println("Zoom off");
+      println("Zoom off / Shift released");
    }
 
-   // If Zoom is inactive execute Scrub Function with Jog Wheel
+   // If Zoom (Button F1) is inactive execute Scrub Function with Jog Wheel
 
    if(!zoomFunction) 
    {
@@ -237,6 +258,7 @@ function onMidi(status, data1, data2)
       }
 
       // Scrub Backward
+
       if(jogWheelRotateCounterclockwise()) 
       {
          transport.incPosition(-1.0, true);
@@ -246,7 +268,7 @@ function onMidi(status, data1, data2)
 
    }
 
-   // If Zoom is active execute Zoom Function with Jog Wheel
+   // If Zoom (Button F1) is active execute Zoom Function with Jog Wheel
 
    if(zoomFunction) 
    {
@@ -273,72 +295,40 @@ function onMidi(status, data1, data2)
 
    }
 
-   // Navigate Banks forward
+   // If Shift Button (F1) is not pressed navigate Banks forward
 
-   if(!zoomFunction) 
+   if(!shiftFunction) 
    {
       if(buttonF2() && isPressed()) 
       {
-
          bankFunction = true;
 
-         for(i=1; i<maxBanks; i++)
-         {
-            if(bank == i) 
-            {
-               bank = i+1;
-               host.showPopupNotification("Bank " + bank);
-               println("Switch Bank " + bank + " / " + maxBanks);
-               return;
-            }
-
-         }
-
-         if(bank == maxBanks) 
-         {
-            bank = 1;
-            host.showPopupNotification("Bank " + bank);
-            println("Switch Bank " + bank + " / " + maxBanks);
-            return;
-         }
-
+         if(bank < maxBanks) bank++;
+         else bank = 1;
+         host.showPopupNotification("Bank " + bank);
+         println("Switch Bank " + bank + " / " + maxBanks);
       }
 
       if(buttonF2() && isReleased()) bankFunction = false;
    }
 
-   // Navigate Banks backward
+   // If Bank Button (F2) is pressed navigate Banks backward
 
    if(bankFunction)
    {
 
       if(buttonF1() && isPressed()) 
       {
-         for(i=maxBanks; i>1; i--)
-         {
-            if(bank == i) 
-            {
-               bank = i-1;
-               host.showPopupNotification("Bank " + bank);
-               println("Switch Bank " + bank + " / " + maxBanks);
-               return;
-            }
-
-         }
-
-         if(bank == 1) 
-         {
-            bank = maxBanks;
-            host.showPopupNotification("Bank " + bank);
-            println("Switch Bank " + bank + " / " + maxBanks);
-            return;
-         }
+         if(bank > 1) bank--;
+         else bank = maxBanks;
+         host.showPopupNotification("Bank " + bank);
+         println("Switch Bank " + bank + " / " + maxBanks);
       }
    }
 
-   // Zoom to Fit
+   // If Shift Button (F1) is pressed Zoom to Fit
 
-   if(zoomFunction)  
+   if(shiftFunction)
    {
       if(buttonF2() && isPressed()) 
       {
@@ -366,23 +356,23 @@ function onMidi(status, data1, data2)
       println("Rewind");
    }
 
-   // Add / Clear Marker
+   // If Scene Bank Switcher is disabled add / clear Marker
 
-   if(buttonMarkerAddClear() && isPressed())
+   if(buttonMarkerAddClear() && isPressed() && !sceneBankFunction)
    {
       // TODO: Add / Clear Marker
    }  
 
-   // Next Marker
+   // If Scene Bank Switcher is disabled goto next Marker
 
-   if(buttonMarkerNext() && isPressed())
+   if(buttonMarkerNext() && isPressed() && !sceneBankFunction)
    {
       //arranger.nextMarker(); // TODO: What's the API Method for this ?
    }  
 
-   // Previous Marker
+   // If Scene Bank Switcher is disabled goto previous Marker
 
-   if(buttonMarkerPrevious() && isPressed())
+   if(buttonMarkerPrevious() && isPressed() && !sceneBankFunction)
    {
       //arranger.previousMarker(); // TODO: What's the API Method for this ?
    }   
@@ -417,6 +407,150 @@ function onMidi(status, data1, data2)
    {
       application.arrowKeyUp();
       println("Up");
+   }
+
+   // If Shift button (F1) is pressed enable Scene Selector
+   // TODO: Maybe should also add the other Way F5 + F1
+
+   if(shiftFunction)
+   {
+
+      if(buttonF5() && isPressed())
+      {
+         sceneFunction = true;
+         host.showPopupNotification("Scene Selector");
+         println("Scene Selector on");
+      }
+
+   }
+
+   // Disable Scene Selector
+
+   if(buttonF5() && isReleased() && sceneFunction)
+   {
+      sceneFunction = false;
+      println("Scene Selector off")
+   }
+
+   // Enable Scene Bank Switcher
+
+   if(buttonF5() && isPressed())
+   {
+      sceneBankFunction = true;
+      println("Scene Bank Switcher on");
+   }
+
+   // Disable Scene Bank Switcher
+
+   if(buttonF5() && isReleased())
+   {
+      sceneBankFunction = false;
+      println("Scene Bank Switcher off");
+   }
+
+   // If Scene Bank Switcher is enabled switch Scene Banks forward
+
+   if(sceneBankFunction)
+   {
+      if(buttonF4() && isPressed())
+      {
+         if(sceneBank < maxSceneBanks) sceneBank++;
+         else sceneBank = 1;
+         host.showPopupNotification("Scene Bank " + sceneBank + " (" + (8 * sceneBank - 7) + " - " + (8 * sceneBank) + ")");
+         println("Scene Bank " + sceneBank);
+      }
+   }
+
+   // If Scene Bank Switcher is enabled switch Scene Banks backward
+
+   if(sceneBankFunction)
+   {
+      if(buttonF3() && isPressed())
+      {
+         if(sceneBank > 1) sceneBank--;
+         else sceneBank = maxSceneBanks;
+         host.showPopupNotification("Scene Bank " + sceneBank + " (" + (8 * sceneBank - 7) + " - " + (8 * sceneBank) + ")");
+         println("Scene Bank " + sceneBank);
+      }
+   }
+
+   /*
+    * Launch Scenes
+    */
+
+   if(sceneFunction)
+   {
+      if(button1() && isPressed())
+      {
+         button = 1;
+         scene = (8 * sceneBank - 7) + button - 1;
+         clipLauncherScenesOrSlots.launch(scene - 1 + button - 1);
+         host.showPopupNotification("Launch Scene " + scene);
+         println("Launch Scene " + scene);
+      }
+
+      if(button2() && isPressed())
+      {
+         button = 2;
+         scene = (8 * sceneBank - 7) + button - 1;
+         clipLauncherScenesOrSlots.launch(scene - 1 + button - 1);
+         host.showPopupNotification("Launch Scene " + scene);
+         println("Launch Scene " + scene);
+      }
+
+      if(button3() && isPressed())
+      {
+         button = 3;
+         scene = (8 * sceneBank - 7) + button - 1;
+         clipLauncherScenesOrSlots.launch(scene - 1 + button - 1);
+         host.showPopupNotification("Launch Scene " + scene);
+         println("Launch Scene " + scene);
+      }
+
+      if(button4() && isPressed())
+      {
+         button = 4;
+         scene = (8 * sceneBank - 7) + button - 1;
+         clipLauncherScenesOrSlots.launch(scene - 1 + button - 1);
+         host.showPopupNotification("Launch Scene " + scene);
+         println("Launch Scene " + scene);
+      }
+
+      if(button5() && isPressed())
+      {
+         button = 5;
+         scene = (8 * sceneBank - 7) + button - 1;
+         clipLauncherScenesOrSlots.launch(scene - 1 + button - 1);
+         host.showPopupNotification("Launch Scene " + scene);
+         println("Launch Scene " + scene);
+      }
+
+      if(button6() && isPressed())
+      {
+         button = 6;
+         scene = (8 * sceneBank - 7) + button - 1;
+         clipLauncherScenesOrSlots.launch(scene - 1 + button - 1);
+         host.showPopupNotification("Launch Scene " + scene);
+         println("Launch Scene " + scene);
+      }
+
+      if(button7() && isPressed())
+      {
+         button = 7;
+         scene = (8 * sceneBank - 7) + button - 1;
+         clipLauncherScenesOrSlots.launch(scene - 1 + button - 1);
+         host.showPopupNotification("Launch Scene " + scene);
+         println("Launch Scene " + scene);
+      }
+
+      if(button8() && isPressed())
+      {
+         button = 8;
+         scene = (8 * sceneBank - 7) + button - 1;
+         clipLauncherScenesOrSlots.launch(scene - 1 + button - 1);
+         host.showPopupNotification("Launch Scene " + scene);
+         println("Launch Scene " + scene);
+      }
    }
 
 }
