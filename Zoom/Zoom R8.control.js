@@ -1,6 +1,6 @@
 // Copy this File to:
-// Windows: %USERPROFILE%\Documents\Bitwig Studio\Controller Scripts\
-// Mac and Linux: ~/Bitwig Studio/Controller Scripts/
+// Windows: %USERPROFILE%\Documents\Bitwig Studio\Controller Scripts\Zoom\
+// Mac and Linux: ~/Bitwig Studio/Controller Scripts/Zoom/
 
 loadAPI(1);
 
