@@ -217,7 +217,7 @@ function onMidi(status, data1, data2)
       }
 
       // Set Controller Assignment Labels for the "Studio I/O" Tab in Bitwig
-
+/*
       if(fader1())           userControls.getControl(index).setLabel("Fader 1 (B" + bank + ")"); // Fader 1
       if(fader2())           userControls.getControl(index).setLabel("Fader 2 (B" + bank + ")"); // Fader 2
       if(fader3())           userControls.getControl(index).setLabel("Fader 3 (B" + bank + ")"); // Fader 3
@@ -236,7 +236,7 @@ function onMidi(status, data1, data2)
       if(button6()) userControls.getControl(index).setLabel("Button 6 (B" + bank + ")"); // Button 6
       if(button7()) userControls.getControl(index).setLabel("Button 7 (B" + bank + ")"); // Button 7
       if(button8()) userControls.getControl(index).setLabel("Button 8 (B" + bank + ")"); // Button 8
-
+*/
    }
 
    /*
