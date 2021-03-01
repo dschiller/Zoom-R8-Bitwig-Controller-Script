@@ -20,6 +20,6 @@ Features:
 
 Copy Folder "Zoom" to:
 
-Windows: %USERPROFILE%\Documents\Bitwig Studio\Controller Scripts\
+Windows: `%USERPROFILE%\Documents\Bitwig Studio\Controller Scripts\`
 
-Mac and Linux: ~/Bitwig Studio/Controller Scripts/
+Mac and Linux: `~/Bitwig Studio/Controller Scripts/`
