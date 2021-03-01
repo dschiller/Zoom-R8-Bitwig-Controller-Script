@@ -4,7 +4,7 @@
 
 loadAPI(1);
 
-host.defineController("Zoom", "Zoom R8", "1.3", "a2559d80-af12-11e3-b2b6-0800200c9a66");
+host.defineController("Zoom", "Zoom R8", "1.4", "a2559d80-af12-11e3-b2b6-0800200c9a66");
 host.defineMidiPorts(1, 1);
 host.addDeviceNameBasedDiscoveryPair(["ZOOM R8"], ["ZOOM R8"]);
 
@@ -217,7 +217,9 @@ function onMidi(status, data1, data2)
       }
 
       // Set Controller Assignment Labels for the "Studio I/O" Tab in Bitwig
-/*
+
+      /* Causes Crashes; Fixed by Brandan Lawlor
+      
       if(fader1())           userControls.getControl(index).setLabel("Fader 1 (B" + bank + ")"); // Fader 1
       if(fader2())           userControls.getControl(index).setLabel("Fader 2 (B" + bank + ")"); // Fader 2
       if(fader3())           userControls.getControl(index).setLabel("Fader 3 (B" + bank + ")"); // Fader 3
@@ -236,7 +238,8 @@ function onMidi(status, data1, data2)
       if(button6()) userControls.getControl(index).setLabel("Button 6 (B" + bank + ")"); // Button 6
       if(button7()) userControls.getControl(index).setLabel("Button 7 (B" + bank + ")"); // Button 7
       if(button8()) userControls.getControl(index).setLabel("Button 8 (B" + bank + ")"); // Button 8
-*/
+      
+      */
    }
 
    /*
